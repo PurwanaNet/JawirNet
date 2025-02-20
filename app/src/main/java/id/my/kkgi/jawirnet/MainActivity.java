@@ -1,128 +1,80 @@
-package java.id.my.kkgi.jawirnet;
+package id.my.kkgi.jawirnet;
 
 import android.app.Activity;
 import android.content.Context;
-import android.net.wifi.WifiConfiguration;
-import android.net.wifi.WifiManager;
+import android.content.Intent;
 import android.nfc.NfcAdapter;
 import android.nfc.Tag;
 import android.os.Bundle;
 import android.util.Log;
 import android.widget.TextView;
-import java.net.DatagramPacket;
-import java.net.DatagramSocket;
-import java.net.InetAddress;
-import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
 
 public class MainActivity extends Activity {
-    private static final int PORT = 8888;
-    private static final String SSID_NAME = "kkgi.my.id/JawirNet";
-    private WifiManager wifiManager;
-    private NfcAdapter nfcAdapter;
-    private String deviceId;
-    private TextView statusView;
-    private Map<String, InetAddress> peerDevices = new HashMap<>();
+    private static final String TAG = "MainActivity";
     
+    private WifiManagerHelper wifiManagerHelper;
+    private NFCHandler nfcHandler;
+    private P2PServer p2pServer;
+    private P2PClient p2pClient;
+    
+    private TextView statusView;
+    private String deviceId;
+    private Map<String, String> peerDevices = new HashMap<>(); // Simpan ID perangkat
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
         statusView = findViewById(R.id.statusView);
-        wifiManager = (WifiManager) getApplicationContext().getSystemService(Context.WIFI_SERVICE);
-        nfcAdapter = NfcAdapter.getDefaultAdapter(this);
         
-        if (wifiManager != null && !wifiManager.isWifiEnabled()) {
-            wifiManager.setWifiEnabled(true);
-        }
+        // Inisialisasi WiFi, NFC, dan P2P
+        wifiManagerHelper = new WifiManagerHelper(this);
+        nfcHandler = new NFCHandler();
+        p2pServer = new P2PServer();
+        p2pClient = new P2PClient();
+
+        // Pastikan WiFi aktif
+        wifiManagerHelper.enableWifi();
         
-        connectToSSID();
+        // Coba sambungkan ke SSID atau buat hotspot jika tidak tersedia
+        wifiManagerHelper.connectOrCreateHotspot();
+
+        // Mulai server UDP untuk komunikasi P2P
+        new Thread(() -> p2pServer.startServer(peerDevices)).start();
     }
-    
-    private void connectToSSID() {
-        WifiConfiguration wifiConfig = new WifiConfiguration();
-        wifiConfig.SSID = String.format("\"%s\"", SSID_NAME);
-        wifiConfig.allowedKeyManagement.set(WifiConfiguration.KeyMgmt.NONE);
-        int netId = wifiManager.addNetwork(wifiConfig);
-        
-        if (netId != -1) {
-            wifiManager.disconnect();
-            wifiManager.enableNetwork(netId, true);
-            wifiManager.reconnect();
-        } else {
-            startHotspot();
-        }
-    }
-    
-    private void startHotspot() {
-        Log.d("Jawir", "Starting Hotspot...");
-        WifiConfiguration wifiConfig = new WifiConfiguration();
-        wifiConfig.SSID = SSID_NAME;
-        wifiConfig.allowedKeyManagement.set(WifiConfiguration.KeyMgmt.NONE);
-        
-        try {
-            wifiManager.addNetwork(wifiConfig);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
-    
+
     @Override
     protected void onResume() {
         super.onResume();
-        if (nfcAdapter != null) {
-            nfcAdapter.enableForegroundDispatch(this, null, null, null);
-        }
+        nfcHandler.enableNFC(this);
     }
-    
+
     @Override
-    protected void onNewIntent(android.content.Intent intent) {
+    protected void onNewIntent(Intent intent) {
         super.onNewIntent(intent);
         Tag tag = intent.getParcelableExtra(NfcAdapter.EXTRA_TAG);
+
         if (tag != null) {
-            deviceId = new String(tag.getId(), Charset.forName("UTF-8"));
+            // Konversi ID NFC menjadi string heksadesimal
+            deviceId = Utils.bytesToHex(tag.getId());
             statusView.setText("Device ID: " + deviceId);
-            new Thread(this::startUDPServer).start();
+            Log.d(TAG, "NFC Detected: " + deviceId);
         }
     }
-    
-    private void startUDPServer() {
-        try (DatagramSocket socket = new DatagramSocket(PORT)) {
-            byte[] buffer = new byte[1024];
-            DatagramPacket packet = new DatagramPacket(buffer, buffer.length);
-            
-            while (true) {
-                socket.receive(packet);
-                String received = new String(packet.getData(), 0, packet.getLength());
-                String senderId = received.split(":")[0];
-                String message = received.split(":")[1];
-                
-                peerDevices.put(senderId, packet.getAddress());
-                Log.d("Jawir", "Received from " + senderId + ": " + message);
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
+
+    /**
+     * Kirim pesan ke perangkat lain menggunakan ID NFC.
+     */
+    private void sendMessage(String message, String targetDeviceId) {
+        if (peerDevices.containsKey(targetDeviceId)) {
+            String targetIp = peerDevices.get(targetDeviceId);
+            p2pClient.sendMessage(deviceId, message, targetIp);
+        } else {
+            Log.d(TAG, "Target device ID not found in network.");
         }
-    }
-    
-    private void sendUDPMessage(String message, String targetDeviceId) {
-        new Thread(() -> {
-            try {
-                if (peerDevices.containsKey(targetDeviceId)) {
-                    InetAddress address = peerDevices.get(targetDeviceId);
-                    DatagramSocket socket = new DatagramSocket();
-                    String data = deviceId + ":" + message;
-                    byte[] buffer = data.getBytes();
-                    DatagramPacket packet = new DatagramPacket(buffer, buffer.length, address, PORT);
-                    socket.send(packet);
-                    socket.close();
-                } else {
-                    Log.d("Jawir", "Target device ID not found in network.");
-                }
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-        }).start();
     }
 }
