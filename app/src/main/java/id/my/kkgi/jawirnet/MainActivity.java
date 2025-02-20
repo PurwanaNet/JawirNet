@@ -18,7 +18,7 @@ import java.util.Map;
 
 public class MainActivity extends Activity {
     private static final int PORT = 8888;
-    private static final String SSID_NAME = "Jawir_WiFi";
+    private static final String SSID_NAME = "kkgi.my.id/JawirNet";
     private WifiManager wifiManager;
     private NfcAdapter nfcAdapter;
     private String deviceId;
