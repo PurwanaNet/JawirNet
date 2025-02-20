@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Nama Aplikasi -->
+    <string name="app_name">JawirNet</string>
+
+    <!-- Teks untuk tampilan utama -->
+    <string name="status_initial">Initializing...</string>
+    <string name="btn_send_message">Send Message</string>
+    <string name="device_id_label">Device ID: %s</string>
+    <string name="connection_status">Connecting to SSID: %s</string>
+    <string name="hotspot_status">Starting Hotspot...</string>
+    <string name="peer_not_found">Target device ID not found in network.</string>
+    <string name="message_sent">Message sent to: %s</string>
+    <string name="message_received">Received from %s: %s</string>
+</resources>
