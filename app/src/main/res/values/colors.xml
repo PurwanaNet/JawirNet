@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Warna utama untuk tema -->
+    <color name="primary_color">#1976D2</color> <!-- Biru (Material Design Primary) -->
+    <color name="primary_dark_color">#004BA0</color> <!-- Biru gelap -->
+    <color name="accent_color">#FFC107</color> <!-- Kuning (Material Design Accent) -->
+
+    <!-- Warna latar belakang -->
+    <color name="background_color">#F5F5F5</color> <!-- Abu muda -->
+    <color name="text_color">#212121</color> <!-- Hitam (teks utama) -->
+    <color name="text_secondary_color">#757575</color> <!-- Abu-abu (teks sekunder) -->
+
+    <!-- Warna tombol -->
+    <color name="button_color">#0288D1</color> <!-- Biru terang -->
+    <color name="button_text_color">#FFFFFF</color> <!-- Putih -->
+    
+    <!-- Warna tambahan -->
+    <color name="error_color">#D32F2F</color> <!-- Merah untuk error -->
+    <color name="success_color">#388E3C</color> <!-- Hijau untuk sukses -->
+</resources>
