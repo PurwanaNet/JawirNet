@@ -7,6 +7,8 @@ import android.net.NetworkCapabilities;
 import android.net.wifi.WifiConfiguration;
 import android.net.wifi.WifiManager;
 import android.os.Build;
+import android.os.Handler;
+import android.os.Looper;
 import android.util.Log;
 import java.lang.reflect.Method;
 import java.util.List;
@@ -18,10 +20,20 @@ public class WifiManagerHelper {
     
     private WifiManager wifiManager;
     private Context context;
+    private Handler handler;
+    private boolean isRepeating = true;
 
     public WifiManagerHelper(Context context) {
         this.context = context;
         this.wifiManager = (WifiManager) context.getApplicationContext().getSystemService(Context.WIFI_SERVICE);
+        this.handler = new Handler(Looper.getMainLooper());
+    }
+
+    public boolean connectOrCreateHotspot() {
+        if (connectToSSID()) {
+            return true;
+        }
+        return createHotspot();
     }
 
     public boolean connectToSSID() {
@@ -86,5 +98,23 @@ public class WifiManagerHelper {
             Log.e(TAG, "Failed to create hotspot", e);
             return false;
         }
+    }
+
+    public void startRepeating(Runnable task) {
+        isRepeating = true;
+        handler.postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                if (isRepeating) {
+                    task.run();
+                    handler.postDelayed(this, 5000);
+                }
+            }
+        }, 5000);
+    }
+
+    public void stopRepeating() {
+        isRepeating = false;
+        handler.removeCallbacksAndMessages(null);
     }
 }
