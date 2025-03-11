@@ -19,6 +19,7 @@ JawirNet is an innovative Android application that enables peer-to-peer (P2P) co
 5. If no feedback is received within **30 seconds**, the message is discarded.
 6. **Zone and time information** are bundled with each message from the sender.
 
+## [Indihome Registration](https://sobat.indihome.co.id/landingpage?pid=RCisiform) | [Buy Special Tools, Repeater Point - To - Point Up to 5 km](https://shope.ee/7KSs82EW5Z)
 ---
 
 # 🌐 JawirNet - Komunikasi WiFi Peer-to-Peer dengan NFC & Sistem Repeater
@@ -42,6 +43,7 @@ JawirNet adalah aplikasi Android inovatif yang memungkinkan komunikasi **peer-to
 5. Jika tidak ada feedback dalam **30 detik**, pesan akan diabaikan.
 6. **Zona dan informasi waktu** dikirimkan dalam satu paket bersama pesan.
 
+## [Registrasi Indihome](https://sobat.indihome.co.id/landingpage?pid=RCisiform) | [Beli alat Khusus, Repeater Point - To - Point Hingga 5 km](https://shope.ee/7KSs82EW5Z)
 ---
 
 ## 📥 Installation
